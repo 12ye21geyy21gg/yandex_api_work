@@ -2,7 +2,7 @@ import os
 import sys
 import pygame
 import requests
-import threading
+import threading, copy
 
 
 pygame.init()
@@ -26,25 +26,28 @@ str_data = ''
 
 
 def get_object_at(pos):
-    coords = (
-    x + event.pos[0] / width * d, (height - event.pos[1]) / height * d + y)
-    last_waypoint = coords
+    coords = [
+        x + (pos[0] - width / 2) / (width / 2) * d * 2.02,
+        ((height - pos[1]) - height / 2) / (height / 2) * d * 0.82 + y]
+    global last_waypoint
+    last_waypoint = copy.copy(coords)
 
 
 def draw_misc():
     pygame.draw.rect(screen, render_colors[render_mode % 3],
                      ((width - r * 2, height - r * 2), (r * 2, r * 2)), 0)
-    font = pygame.font.Font(None, 10)
+    font = pygame.font.Font(None, 25)
     text = font.render(render_modes[render_mode % 3], 1, pygame.Color('black'))
     screen.blit(text, (width - r - 10, height - r - 10))
     pygame.draw.rect(screen, render_colors[1],
                      ((0, height - r * 2), (r * 2, r * 2)))
-    font = pygame.font.Font(None, 10)
+    font = pygame.font.Font(None, 25)
     text = font.render("menu", 1, pygame.Color('black'))
     screen.blit(text, (5, height - r - 10))
 
 
 def get_data_of(name):
+    global x, y, data
     geocoder_api_server = "http://geocode-maps.yandex.ru/1.x/"
 
     geocoder_params = {
@@ -58,6 +61,7 @@ def get_data_of(name):
     toponym = json_response["response"]["GeoObjectCollection"][
         "featureMember"][0]["GeoObject"]
     toponym_coodrinates = toponym["Point"]["pos"]
+
     x, y = toponym_coodrinates.split(" ")
     data = toponym
 
@@ -66,17 +70,19 @@ def call_menu():
 
 
 def make_str():
+    global s
     s = ''
     s = s + 'name:'
 
 def restart():
+    global data, last_waypoint, isUpdated
     data = None
     last_waypoint = None
     isUpdated = False
 
 
-menu_thread = threading.Thread(target=, (,))
-manu_thread.start()
+# menu_thread = threading.Thread(target=, (,))
+# manu_thread.start()
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -84,29 +90,30 @@ while running:
         if event.type == pygame.KEYDOWN:
             isUpdated = False
             if event.key == pygame.K_UP:
-                y += (d) / 2
+                y += (d) / 2 * height / width
             elif event.key == pygame.K_DOWN:
-                y -= (d) / 2
+                y -= (d) / 2 * height / width
             elif event.key == pygame.K_LEFT:
                 x -= (d) / 2
             elif event.key == pygame.K_RIGHT:
                 x += (d) / 2
             elif event.key == pygame.K_PAGEUP:
-                d *= 0.1
-                if d <= 0.01:
-                    d = 0.01
+                d *= 0.5
+                if d <= 0.001:
+                    d = 0.001
             elif event.key == pygame.K_PAGEDOWN:
-                d *= 10
-                if d >= 1:
-                    d = 1
+                d *= 2
+                if d >= 10:
+                    d = 10
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                if (event.pos[0] <= width and event.pos[0] >= width - r and
-                        event.pos[1] <= height and event.pos[1] >= height - r):
+                if (event.pos[0] <= width and event.pos[0] >= width - r * 2 and
+                        event.pos[1] <= height and event.pos[1] >= height - r * 2):
+
                     render_mode += 1
                     isUpdated = False
-                elif (event.pos[0] <= r and event.pos[0] >= 0 and event.pos[
-                    1] <= height and event.pos[1] >= height - r):
+                elif (event.pos[0] <= r * 2 and event.pos[0] >= 0 and event.pos[
+                    1] <= height and event.pos[1] >= height - r * 2):
                     call_menu()
                 else:
                     get_object_at(event.pos)
@@ -114,6 +121,7 @@ while running:
 
 
     if not isUpdated:
+        screen.fill((0, 0, 0))
         if last_waypoint is None:
             map_request = f"http://static-maps.yandex.ru/1.x/?ll={x},{y}&spn={d},{d}&l={render_modes[render_mode % 3]}"
         else:
@@ -127,16 +135,16 @@ while running:
             sys.exit(1)
         isUpdated = True
         # Запишем полученное изображение в файл.
-    map_file = "map.png"
-    with open(map_file, "wb") as file:
-        file.write(response.content)
+        map_file = "map.png"
+        with open(map_file, "wb") as file:
+            file.write(response.content)
         # Инициализируем pygame
 
         # Рисуем картинку, загружаемую из только что созданного файла.
-    screen.blit(pygame.image.load(map_file), (0, 0))
-    draw_misc()
+        screen.blit(pygame.image.load(map_file), (0, 0))
+        draw_misc()
 
-    pygame.display.flip()
+        pygame.display.flip()
 pygame.quit()
 # Удаляем за собой файл с изображением.
 os.remove(map_file)
