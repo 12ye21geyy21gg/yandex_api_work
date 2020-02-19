@@ -3,6 +3,8 @@ import sys
 import pygame
 import requests
 import threading, copy
+from PyQt5.QtWidgets import QApplication
+import settings
 
 
 pygame.init()
@@ -23,6 +25,13 @@ data = None
 isIndex = False
 isAddress = False
 str_data = ''
+
+
+def start_settings():
+    app = QApplication(sys.argv)
+    settings_window = settings.cart()
+    settings_window.show()
+    sys.exit(app.exec_())
 
 
 def get_object_at(pos):
@@ -81,8 +90,8 @@ def restart():
     isUpdated = False
 
 
-# menu_thread = threading.Thread(target=, (,))
-# manu_thread.start()
+menu_thread = threading.Thread(target=start_settings, args=[])
+menu_thread.start()
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
