@@ -17,6 +17,9 @@ running = True
 x, y, d = 37.0, 57.0, 0.2
 last_waypoint = None
 isUpdated = False
+data = None
+isIndex = False
+isAddress = False
 
 
 def get_object_at(pos):
@@ -38,8 +41,31 @@ def draw_misc():
     screen.blit(text, (5, height - r - 10))
 
 
+def get_data_of(name):
+    geocoder_api_server = "http://geocode-maps.yandex.ru/1.x/"
+
+    geocoder_params = {
+        "apikey": "40d1649f-0493-4b70-98ba-98533de7710b",
+        "geocode": name,
+        "format": "json"}
+
+    response = requests.get(geocoder_api_server, params=geocoder_params)
+
+    json_response = response.json()
+    toponym = json_response["response"]["GeoObjectCollection"][
+        "featureMember"][0]["GeoObject"]
+    toponym_coodrinates = toponym["Point"]["pos"]
+    x, y = toponym_coodrinates.split(" ")
+    data = toponym
+
 def call_menu():
     pass
+
+
+def restart():
+    data = None
+    last_waypoint = None
+    isUpdated = False
 
 while running:
     for event in pygame.event.get():
