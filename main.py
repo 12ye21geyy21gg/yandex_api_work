@@ -23,6 +23,10 @@ while running:
                 x -= (d - 0.1)
             elif event.key == pygame.K_RIGHT:
                 x += (d - 0.1)
+            elif event.key == pygame.K_PAGEUP:
+                d *= 0.1
+            elif event.key == pygame.K_PAGEDOWN:
+                d *= 10
     if not isUpdated:
         map_request = f"http://static-maps.yandex.ru/1.x/?ll={x},{y}&spn={d},{d}&l=sat"
         response = requests.get(map_request)
