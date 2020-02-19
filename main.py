@@ -2,6 +2,8 @@ import os
 import sys
 import pygame
 import requests
+import threading
+
 
 pygame.init()
 width = 600
@@ -20,6 +22,7 @@ isUpdated = False
 data = None
 isIndex = False
 isAddress = False
+str_data = ''
 
 
 def get_object_at(pos):
@@ -62,11 +65,18 @@ def call_menu():
     pass
 
 
+def make_str():
+    s = ''
+    s = s + 'name:'
+
 def restart():
     data = None
     last_waypoint = None
     isUpdated = False
 
+
+menu_thread = threading.Thread(target=, (,))
+manu_thread.start()
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
