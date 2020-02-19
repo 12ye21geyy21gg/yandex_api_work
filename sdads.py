@@ -15,10 +15,20 @@ class cart(QWidget, Ui_Form):
         self.textEdit.setText()#то что нужно ввест
     # to pygame :
     def cheche(self): #
-        if QCheckBox
+        postal = False
+        adress = False
+        if self.checkBox.isChecked():
+            postal = True
+        else:
+            postal = False
+        if self.checkBox_2.isChecked():
+            adress = True
+        else:
+            adress = False
 
-
+            
 if __name__ == '__main__':
-        app = QApplication(sys.argv)
-        ex = Example()
-        sys.exit(app.exec_())
+    app = QApplication(sys.argv)
+    ex = cart()
+    ex.show()
+    sys.exit(app.exec_())
