@@ -26,9 +26,10 @@ class cart(QWidget, Ui_Form):
         if os.path.isfile('taxi2'):
             with open('taxi2', mode='r', encoding='utf8') as f:
                 t = f.read()
+                print(t != self.textEdit.toPlainText(),t,self.textEdit.toPlainText())
                 if t != self.textEdit.toPlainText():
                     self.textEdit.setText(t)
-            # os.remove('taxi2')
+            os.remove('taxi2')
 
     def search(self):
         self.S_O = self.lineEdit.text()

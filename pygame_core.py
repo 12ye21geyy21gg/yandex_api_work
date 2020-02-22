@@ -29,14 +29,13 @@ class pygame_thread():
         self.isIndex = False
         self.isAddress = False
         self.str_data = ''
+        self.threads = list()
+        self.last_s = str()
 
     def get_object_at(self, pos):
         coords = [
             self.x + (pos[0] - self.width / 2) / (self.width / 2) * self.d * 2.02,
             ((self.height - pos[1]) - self.height / 2) / (self.height / 2) * self.d * 0.82 + self.y]
-        # self.last_waypoint = copy.copy(coords)
-        # self.x = self.last_waypoint[0]
-        # self.y = self.last_waypoint[1]
         self.get_data_of(','.join(map(lambda x: str(x), coords)))
         self.last_waypoint = copy.copy(coords)
 
@@ -71,9 +70,12 @@ class pygame_thread():
         if setCoords:
             self.x, self.y = map(lambda x: float(x), toponym_coodrinates.split(" "))
         self.data = toponym
-        print(self.data)
 
     def call_menu(self):
+        t = threading.Thread(target=self.make_daemon,daemon=True)
+        t.start()
+        self.threads.append(t)
+    def make_daemon(self):
         os.system('python settings.py')
 
     def make_str(self):
@@ -85,13 +87,14 @@ class pygame_thread():
                     s = s + f'Доп. Информация:{self.data["description"]}\n'
                     s = s + f'Тип:{self.data["metaDataProperty"]["GeocoderMetaData"]["kind"]}\n'
                     if self.isIndex:
-                        s = s + f'Код почты:{self.data["metaDataProperty"]["GeocoderMetaData"]["Address"][
-                            "postal_code"]}\n'
+                        s = s + f'Код почты:{self.data["metaDataProperty"]["GeocoderMetaData"]["Address"]["postal_code"]}\n'
                 except Exception:
-                    print('error try again')
+                    pass
             s = s + f'Координаты: {self.data["Point"]["pos"]}'
-        with open('taxi2', mode='w', encoding='utf8') as f:
-            f.write(s)
+        if s != self.last_s:
+            self.last_s = s
+            with open('taxi2', mode='w', encoding='utf8') as f:
+                f.write(s)
 
     def restart(self):
         self.data = None
@@ -105,7 +108,6 @@ class pygame_thread():
                 if data.split(':')[0] == 'reset':
                     self.restart()
                 elif data.split(':')[0] == 'search':
-                    print(data.split(':')[1])
                     self.get_data_of(data.split(':')[1], True)
                 elif data.split(':')[0] == 'check':
                     if data.split(':')[1][0] == '1':
@@ -135,6 +137,12 @@ class pygame_thread():
                         self.d = 0.001
             self.isUpdated = False
             os.remove('taxi1')
+    def clean(self):
+        try:
+            os.remove('taxi1')
+            os.remove('taxi2')
+        except Exception:
+            print('cleaned')
 
     def loop(self):
         while self.running:
@@ -186,27 +194,25 @@ class pygame_thread():
             if not self.isUpdated:
                 self.screen.fill((0, 0, 0))
                 if self.last_waypoint is None:
-                    map_request = f"http://static-maps.yandex.ru/1.x/?ll={self.x},{self.y}&spn={self.d},{self.d}&l={
-                    self.render_modes[self.render_mode % 3]}"
+                    map_request = f"http://static-maps.yandex.ru/1.x/?ll={self.x},{self.y}&spn={self.d},{self.d}&l={self.render_modes[self.render_mode % 3]}"
                 else:
-                    map_request = f"http://static-maps.yandex.ru/1.x/?ll={self.x},{self.y}&spn={self.d},{self.d}&l={
-                    self.render_modes[self.render_mode % 3]}&pt={self.last_waypoint[0]},{self.last_waypoint[1]}"
+                    map_request = f"http://static-maps.yandex.ru/1.x/?ll={self.x},{self.y}&spn={self.d},{self.d}&l={self.render_modes[self.render_mode % 3]}&pt={self.last_waypoint[0]},{self.last_waypoint[1]}"
                 response = requests.get(map_request)
                 if not response:
                     print("Ошибка выполнения запроса:")
                     print(map_request)
                     print("Http статус:", response.status_code, "(", response.reason,
                           ")")
-                    sys.exit(1)
-                self.isUpdated = True
-                # Запишем полученное изображение в файл.
-                map_file = "map.png"
-                with open(map_file, "wb") as file:
-                    file.write(response.content)
-                # Инициализируем pygame
+                else:
+                    self.isUpdated = True
+                    # Запишем полученное изображение в файл.
+                    map_file = "map.png"
+                    with open(map_file, "wb") as file:
+                        file.write(response.content)
+                    # Инициализируем pygame
 
-                # Рисуем картинку, загружаемую из только что созданного файла.
-                self.screen.blit(pygame.image.load(map_file), (0, 0))
+                    # Рисуем картинку, загружаемую из только что созданного файла.
+                    self.screen.blit(pygame.image.load(map_file), (0, 0))
                 self.draw_misc()
 
                 pygame.display.flip()
@@ -217,3 +223,4 @@ class pygame_thread():
 
 pg = pygame_thread()
 pg.loop()
+pg.clean()
