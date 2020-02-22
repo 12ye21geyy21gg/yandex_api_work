@@ -16,6 +16,18 @@
              <verstretch>0</verstretch>
          </sizepolicy>
      </property>
+     <property name="minimumSize">
+         <size>
+             <width>759</width>
+             <height>218</height>
+         </size>
+     </property>
+     <property name="maximumSize">
+         <size>
+             <width>759</width>
+             <height>218</height>
+         </size>
+     </property>
   <property name="windowTitle">
       <string>Настройки</string>
   </property>
@@ -37,7 +49,7 @@
     <rect>
      <x>70</x>
         <y>10</y>
-        <width>231</width>
+        <width>221</width>
      <height>20</height>
     </rect>
    </property>
@@ -48,7 +60,7 @@
         <x>300</x>
         <y>10</y>
      <width>75</width>
-     <height>23</height>
+        <height>21</height>
     </rect>
    </property>
    <property name="text">
@@ -58,10 +70,10 @@
   <widget class="QPushButton" name="pushButton_2">
    <property name="geometry">
     <rect>
-        <x>280</x>
-        <y>122</y>
-     <width>75</width>
-        <height>81</height>
+        <x>260</x>
+        <y>170</y>
+        <width>111</width>
+        <height>31</height>
     </rect>
    </property>
    <property name="text">
@@ -213,6 +225,19 @@
    </property>
    <property name="text">
        <string>Подробная информация</string>
+   </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_4">
+         <property name="geometry">
+             <rect>
+                 <x>260</x>
+                 <y>120</y>
+                 <width>111</width>
+                 <height>31</height>
+             </rect>
+         </property>
+         <property name="text">
+             <string>переместиться</string>
    </property>
   </widget>
  </widget>
