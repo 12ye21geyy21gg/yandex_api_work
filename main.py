@@ -58,18 +58,20 @@ class pygame_thread():
             "apikey": "40d1649f-0493-4b70-98ba-98533de7710b",
             "geocode": name,
             "format": "json"}
+        try:
+            response = requests.get(geocoder_api_server, params=geocoder_params)
 
-        response = requests.get(geocoder_api_server, params=geocoder_params)
-
-        json_response = response.json()
-        toponym = json_response["response"]["GeoObjectCollection"][
-            "featureMember"][0]["GeoObject"]
-        toponym_coodrinates = toponym["Point"]["pos"]
-        # print(toponym_coodrinates)
-        self.last_waypoint = list(map(lambda x: float(x), toponym_coodrinates.split(" ")))
-        if setCoords:
-            self.x, self.y = map(lambda x: float(x), toponym_coodrinates.split(" "))
-        self.data = toponym
+            json_response = response.json()
+            toponym = json_response["response"]["GeoObjectCollection"][
+                "featureMember"][0]["GeoObject"]
+            toponym_coodrinates = toponym["Point"]["pos"]
+            # print(toponym_coodrinates)
+            self.last_waypoint = list(map(lambda x: float(x), toponym_coodrinates.split(" ")))
+            if setCoords:
+                self.x, self.y = map(lambda x: float(x), toponym_coodrinates.split(" "))
+            self.data = toponym
+        except Exception:
+            print('wrong request')
 
     def call_menu(self):
         t = threading.Thread(target=self.make_daemon,daemon=True)
@@ -119,22 +121,25 @@ class pygame_thread():
                     else:
                         self.isAddress = False
                 elif data.split(':')[0] == 'move':
-                    temp = data.split(':')[1].split(',')
-                    self.x = float(temp[0])
-                    if self.x >= 180 - self.d:
-                        self.x = 180 - self.d
-                    if self.x <= -180 + self.d:
-                        self.x = -180 + self.d
-                    self.y = float(temp[1])
-                    if self.y >= 85 - self.d:
-                        self.y = 85 - self.d
-                    if self.y <= -85 + self.d:
-                        self.y = -85 + self.d
-                    self.d = float(temp[2])
-                    if self.d >= 10:
-                        self.d = 10
-                    if self.d <= 0.001:
-                        self.d = 0.001
+                    try:
+                        temp = data.split(':')[1].split(',')
+                        self.x = float(temp[0])
+                        if self.x >= 180 - self.d:
+                            self.x = 180 - self.d
+                        if self.x <= -180 + self.d:
+                            self.x = -180 + self.d
+                        self.y = float(temp[1])
+                        if self.y >= 85 - self.d:
+                            self.y = 85 - self.d
+                        if self.y <= -85 + self.d:
+                            self.y = -85 + self.d
+                        self.d = float(temp[2])
+                        if self.d >= 10:
+                            self.d = 10
+                        if self.d <= 0.001:
+                            self.d = 0.001
+                    except Exception:
+                        print('wrong coords')
             self.isUpdated = False
             os.remove('taxi1')
     def clean(self):
